@@ -26,7 +26,7 @@ Tiny CTA widget for existing websites.
 
 以下のURLより、実際の動作を確認できるデモページをご覧いただけます。
 
-[https://monou-jp.github.io/SubmitFlow-OSS/](https://monou-jp.github.io/SubmitFlow-OSS/)
+[https://monou-jp.github.io/floatdock/](https://monou-jp.github.io/floatdock/)
 
 
 ローカルで確認する場合は、`docs/index.html` をブラウザで開いてください。
