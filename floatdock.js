@@ -8,7 +8,7 @@
  */
 
 /*!
- * ConsentDock
+ * FloatDock
  * Copyright (c) 2026 門王 (https://monou.jp)
  * SPDX-License-Identifier: BSD-3-Clause
  *
