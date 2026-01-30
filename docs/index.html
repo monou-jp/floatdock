@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>floatdock — Tiny CTA widget for existing websites</title>
+  <meta name="description" content="floatdock: Add floating / bottom-bar / expand-fab CTA UI to existing websites with a single script tag." />
+
+  <style>
+    :root{
+      --bg0:#070b14;
+      --bg1:#0b1220;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --line: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --muted2: rgba(255,255,255,.54);
+      --accent: rgba(78,161,255,.95);
+      --good: rgba(46,204,113,.95);
+      --warn: rgba(241,196,15,.95);
+      --bad: rgba(231,76,60,.95);
+      --shadow: 0 30px 120px rgba(0,0,0,.55);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+              radial-gradient(1100px 420px at 20% -10%, rgba(78,161,255,.35), transparent 60%),
+              radial-gradient(1000px 380px at 90% 5%, rgba(46,204,113,.22), transparent 58%),
+              radial-gradient(900px 520px at 70% 110%, rgba(241,196,15,.10), transparent 52%),
+              linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg0));
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,
+      "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+    .nav{
+      position:sticky;top:0;z-index:20;
+      background: rgba(11,18,32,.72);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .nav-inner{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 0;gap:12px;
+    }
+    .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px;}
+    .logo-badge{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(78,161,255,.9), rgba(46,204,113,.85));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .logo-badge svg{display:block}
+    .nav-links{
+      display:flex;gap:14px;align-items:center;
+      color:var(--muted);
+      font-size:13px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .nav-links a:hover{color:var(--text)}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      font-weight:800;font-size:13px;
+    }
+    .btn.primary{
+      background: rgba(78,161,255,.16);
+      border-color: rgba(78,161,255,.35);
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .hero{padding:54px 0 10px;}
+    .hero-grid{display:grid;gap:18px;grid-template-columns: 1fr;}
+    @media (min-width: 980px){
+      .hero-grid{grid-template-columns: 1.1fr .9fr; align-items:start;}
+    }
+    .h-title{font-size:40px;line-height:1.05;margin:0;letter-spacing:-.6px;}
+    @media (min-width: 980px){ .h-title{font-size:52px;} }
+    .h-sub{
+      margin:12px 0 0;color:var(--muted);
+      line-height:1.8;font-size:15px;
+      max-width:60ch;
+    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .chip{
+      padding:7px 10px;border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:12px;font-weight:800;
+    }
+    .chip.good{border-color: rgba(46,204,113,.28); background: rgba(46,204,113,.10); color: rgba(225,255,236,.9);}
+    .chip.blue{border-color: rgba(78,161,255,.28); background: rgba(78,161,255,.10); color: rgba(224,240,255,.92);}
+    .chip.warn{border-color: rgba(241,196,15,.28); background: rgba(241,196,15,.09); color: rgba(255,248,224,.92);}
+    .chip.bad{border-color: rgba(231,76,60,.28); background: rgba(231,76,60,.09); color: rgba(255,233,233,.92);}
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .card{
+      background: var(--card);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card.pad{padding:16px}
+    .preview{
+      padding:16px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background:
+              radial-gradient(900px 240px at 20% 0%, rgba(78,161,255,.16), transparent 62%),
+              rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+    .preview-top{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:14px;gap:10px;flex-wrap:wrap;
+    }
+    .seg{
+      display:flex;gap:6px;flex-wrap:wrap;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      padding:6px;border-radius:16px;
+    }
+    .seg button{
+      border:1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding:9px 10px;border-radius:12px;
+      font-weight:900;font-size:12px;cursor:pointer;
+    }
+    .seg button.active{
+      background: rgba(78,161,255,.18);
+      border-color: rgba(78,161,255,.30);
+      color: rgba(224,240,255,.95);
+    }
+    .tog{
+      display:flex;align-items:center;gap:10px;
+      color:var(--muted);
+      font-size:12px;font-weight:800;
+      user-select:none;
+    }
+    .tog input{transform:scale(1.1)}
+    .mock{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      overflow:hidden;
+    }
+    .mockbar{
+      display:flex;align-items:center;gap:6px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.55);
+      font-size:12px;font-weight:800;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background: rgba(255,255,255,.20)}
+    .mockbody{
+      padding:16px;
+      height: 280px;
+      display:grid;
+      gap:12px;
+      position:relative;
+    }
+    .ph{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding:12px;
+      color: rgba(255,255,255,.55);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .section{padding:36px 0}
+    .grid{display:grid;gap:12px;grid-template-columns: 1fr;}
+    @media (min-width: 860px){ .grid{grid-template-columns: 1fr 1fr 1fr;} }
+    .feat{
+      padding:16px;border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .feat b{display:block;margin-bottom:6px}
+    .feat p{margin:0;color:var(--muted);line-height:1.7;font-size:13px}
+    .code{
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding:14px;
+      overflow:auto;
+      box-shadow: 0 25px 90px rgba(0,0,0,.45);
+    }
+    pre{margin:0;white-space:pre;line-height:1.6}
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      color: rgba(228,240,255,.95);
+    }
+    .two{display:grid;gap:12px;grid-template-columns:1fr;}
+    @media (min-width: 980px){ .two{grid-template-columns: 1fr 1fr;} }
+    .small{font-size:12px;color:var(--muted2);line-height:1.7}
+    .hr{height:1px;background: rgba(255,255,255,.10);margin:18px 0;}
+    .footer{
+      padding:28px 0 80px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.18);
+      color:var(--muted);
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      padding:.15em .45em;
+      border:1px solid rgba(255,255,255,.2);
+      border-bottom-color: rgba(255,255,255,.12);
+      border-radius:8px;
+      background:rgba(0,0,0,.25);
+    }
+    .callout{
+      padding:14px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .callout b{display:block;margin-bottom:6px}
+    .callout p{margin:0;color:var(--muted);line-height:1.8;font-size:13px}
+    .list{
+      margin:10px 0 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 13px;
+    }
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 12px;
+      margin: 0 6px 6px 0;
+      white-space: nowrap;
+    }
+    .tag.good{border-color: rgba(46,204,113,.24); background: rgba(46,204,113,.09); color: rgba(225,255,236,.88);}
+    .tag.warn{border-color: rgba(241,196,15,.24); background: rgba(241,196,15,.08); color: rgba(255,248,224,.9);}
+    .tag.bad{border-color: rgba(231,76,60,.24); background: rgba(231,76,60,.08); color: rgba(255,233,233,.9);}
+
+    /* ---------- demo widgets inside the mock --------- */
+    .demo-float{
+      position:absolute;
+      right: 14px; bottom: 14px;
+      display:flex;align-items:center;justify-content:center;
+      width:56px;height:56px;border-radius:999px;
+      background: linear-gradient(135deg, rgba(78,161,255,.95), rgba(46,204,113,.90));
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.18);
+      color:white;
+    }
+    .demo-bar{
+      position:absolute;left:0;right:0;bottom:0;
+      display:flex;overflow:hidden;
+      border-top-left-radius:18px;border-top-right-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      border-bottom: none;
+      box-shadow: 0 25px 80px rgba(0,0,0,.55);
+    }
+    .demo-bar a{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
+      height:64px;font-weight:900;font-size:13px;
+      color:white;
+    }
+    .demo-bar .left{background: rgba(229,57,53,.95)}
+    .demo-bar .right{background: rgba(6,199,85,.95)}
+    .demo-fab{
+      position:absolute;right:14px;bottom:14px;
+      display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+    }
+    .demo-fab .main{
+      width:56px;height:56px;border-radius:999px;
+      background: rgba(6,199,85,.95);
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      color:white;
+      cursor:pointer;
+    }
+    .demo-fab .items{display:none;flex-direction:column;gap:10px;align-items:flex-end}
+    .demo-fab.open .items{display:flex}
+    .demo-fab .item{
+      display:flex;align-items:center;gap:10px;
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      padding:10px 12px;
+      color:white;
+      font-weight:900;font-size:12px;
+    }
+    .demo-fab .bubble{
+      width:44px;height:44px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .bg-red{background: rgba(229,57,53,.95)}
+    .bg-green{background: rgba(6,199,85,.95)}
+    .bg-blue{background: rgba(30,136,229,.95)}
+  </style>
+
+  <!-- =========================================================
+       floatdock.js が読む設定（デモ用）
+       本番は floatdock.js 内に設定を内蔵してもOK
+       ※ あなたの実装が window.FLOATDOCK_CONFIG を読む前提
+  ========================================================== -->
+  <script>
+    window.FLOATDOCK_CONFIG = {
+      zIndex: 99999,
+      breakpoint: 768,
+      lineUrl: "https://example.com/line",
+      contactUrl: "tel:0120-000-000",
+      display: { desktop: "floating", mobile: "bottom-bar" },
+      hideOnScroll: {
+        enabled: true,
+        hideDirection: "down",
+        hideAfter: 120,
+        minDelta: 10,
+        showAtTop: true,
+        topThreshold: 40,
+        animationMs: 180
+      }
+      // 詳細設定（mobileBottomBar / mobileFloating / mobileExpandFab 等）は
+      // floatdock.js 側のデフォルトを使う想定
+    };
+  </script>
+
+  <!-- floatdock 本体（同階層に置く） -->
+  <script src="../floatdock.js" defer></script>
+</head>
+
+<body>
+<div class="nav">
+  <div class="wrap">
+    <div class="nav-inner">
+      <div class="logo">
+        <div class="logo-badge" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M20 12c0 3.8-3.6 6.9-8 6.9-1 0-2-.2-2.9-.5L4 20l1.3-3.2C4.5 15.7 4 13.9 4 12c0-3.8 3.6-6.9 8-6.9s8 3.1 8 6.9Z" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:14px;">floatdock</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:800;">Tiny CTA widget</div>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#modes">Modes</a>
+        <a href="#usage">Usage</a>
+        <a href="#config">Config</a>
+        <a href="#constraints">Constraints</a>
+        <a href="#troubleshoot">Troubleshoot</a>
+        <a href="https://github.com/monou-jp/floatdock" class="btn">GitHub</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero" id="demo">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <h1 class="h-title">Add CTA UI to any site<br/>with one script tag.</h1>
+        <p class="h-sub">
+          floatdock は、既存サイトに <span class="kbd">&lt;script&gt;</span> 1行で
+          <b>フローティング</b> / <b>下部固定</b> / <b>展開メニュー（FAB）</b> の導線UIを追加する軽量ウィジェットです。
+          PCとスマホで表示方式を切り替え、スクロール時に隠す挙動も設定できます。
+        </p>
+
+        <div class="chips">
+          <span class="chip good">Vanilla JS</span>
+          <span class="chip blue">No dependencies</span>
+          <span class="chip good">Single file</span>
+          <span class="chip warn">Hide on scroll</span>
+          <span class="chip blue">3 mobile modes</span>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="#usage">Quick start</a>
+          <a class="btn" href="#constraints">Constraints / CSP</a>
+          <a class="btn" href="#config">Config reference</a>
+        </div>
+
+        <div class="hr"></div>
+        <div class="small">
+          このページは「紹介ページ」用のサンプルです。上のプレビューは見た目のモックで、
+          実際の floatdock はこのページ末尾で読み込まれます（<code>./floatdock.js</code>）。
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="preview">
+          <div class="preview-top">
+            <div class="seg" role="tablist" aria-label="Mode selector">
+              <button id="segBar" class="active" type="button">bottom-bar</button>
+              <button id="segFloat" type="button">floating</button>
+              <button id="segFab" type="button">expand-fab</button>
+            </div>
+            <label class="tog">
+              <input id="segHide" type="checkbox" checked />
+              hide on scroll
+            </label>
+          </div>
+
+          <div class="mock" id="mock">
+            <div class="mockbar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span style="margin-left:8px;">Preview</span>
+              <span style="margin-left:auto;color:rgba(255,255,255,.45);font-weight:800;">(visual mock)</span>
+            </div>
+            <div class="mockbody">
+              <div class="ph">Hero section / content block</div>
+              <div class="ph">Long page… (scroll to see hide/show)</div>
+              <div class="ph">CTA should stay accessible</div>
+
+              <!-- bottom bar -->
+              <div class="demo-bar" id="demoBar" aria-hidden="true">
+                <a class="left" href="javascript:void(0)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6.5 3.5l3 2-1.2 2.4c-.2.4-.1.9.2 1.2l3.4 3.4c.3.3.8.4 1.2.2L15.5 12l2 3c.4.6.3 1.4-.2 1.9l-1.3 1.3c-.7.7-1.7 1-2.7.7-2.6-.7-5.2-2.5-7.5-4.8S2.7 9.2 2 6.6c-.3-1 .0-2 .7-2.7L4 2.6c.5-.5 1.3-.6 2-.1Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                  <span>CALL</span>
+                </a>
+                <a class="right" href="javascript:void(0)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  <span>LINE</span>
+                </a>
+              </div>
+
+              <!-- floating -->
+              <div class="demo-float" id="demoFloat" aria-hidden="true" style="display:none;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+
+              <!-- expand fab -->
+              <div class="demo-fab" id="demoFab" aria-hidden="true" style="display:none;">
+                <div class="items">
+                  <div class="item">
+                    <span style="opacity:.92;">CALL</span>
+                    <span class="bubble bg-red">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M6.5 3.5l3 2-1.2 2.4c-.2.4-.1.9.2 1.2l3.4 3.4c.3.3.8.4 1.2.2L15.5 12l2 3c.4.6.3 1.4-.2 1.9l-1.3 1.3c-.7.7-1.7 1-2.7.7-2.6-.7-5.2-2.5-7.5-4.8S2.7 9.2 2 6.6c-.3-1 .0-2 .7-2.7L4 2.6c.5-.5 1.3-.6 2-.1Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
+                  </div>
+                  <div class="item">
+                    <span style="opacity:.92;">LINE</span>
+                    <span class="bubble bg-green">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
+                          <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                      </span>
+                  </div>
+                  <div class="item">
+                    <span style="opacity:.92;">BOOK</span>
+                    <span class="bubble bg-blue">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M7 3v3M17 3v3" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
+                          <path d="M4 8h16v12H4V8Z" stroke="rgba(255,255,255,.95)" stroke-width="2"/>
+                          <path d="M4 11h16" stroke="rgba(255,255,255,.95)" stroke-width="2"/>
+                        </svg>
+                      </span>
+                  </div>
+                </div>
+                <div class="main" id="fabMain" role="button" aria-label="open menu">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 7h14M5 12h14M5 17h14" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="small" style="margin-top:12px;">
+            <span class="kbd">bottom-bar</span> は店舗サイト導線、
+            <span class="kbd">floating</span> はLP向き、
+            <span class="kbd">expand-fab</span> はアクションが増える場合に有効です。
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px; letter-spacing:.2px;">Features</h2>
+    <div class="grid">
+      <div class="feat">
+        <b>Single script</b>
+        <p>既存サイトに <code>&lt;script src=".../floatdock.js"&gt;</code> 1行で導入できます。</p>
+      </div>
+      <div class="feat">
+        <b>Device modes</b>
+        <p>PC/スマホで表示方式を切替（スマホは 3モード）。</p>
+      </div>
+      <div class="feat">
+        <b>Hide on scroll</b>
+        <p>スクロール中は隠して、必要時だけ表示（設定で調整）。</p>
+      </div>
+      <div class="feat">
+        <b>Vanilla JS</b>
+        <p>依存ライブラリ無し。WordPress等でも扱いやすい構成です。</p>
+      </div>
+      <div class="feat">
+        <b>Customizable</b>
+        <p>文言、位置、サイズ、色、リンク先を設定可能。</p>
+      </div>
+      <div class="feat">
+        <b>Accessible (basic)</b>
+        <p>基本的な <code>aria-label</code> を付与（必要に応じて拡張）。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="modes">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Modes</h2>
+    <div class="two">
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Desktop</b>
+        <div class="small">
+          <div>• <span class="kbd">floating</span>（右下/右上/左下/左上）</div>
+          <div>• サイズ・文言・サブラベルを設定</div>
+        </div>
+      </div>
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Mobile</b>
+        <div class="small">
+          <div>• <span class="kbd">bottom-bar</span>：下部固定2ボタン</div>
+          <div>• <span class="kbd">floating</span>：丸/角丸ボタン</div>
+          <div>• <span class="kbd">expand-fab</span>：タップで縦展開メニュー</div>
+        </div>
+      </div>
+    </div>
+    <div class="small" style="margin-top:10px;">
+      スマホ判定は <span class="kbd">window.innerWidth &lt; breakpoint</span>（User-Agentは使用しません）。
+    </div>
+  </div>
+</section>
+
+<section class="section" id="usage">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Quick start</h2>
+
+    <div class="two">
+      <div class="code" aria-label="embed code">
+<pre><code>&lt;!-- 1) floatdock.js を配置（GitHub Pages / 自社ドメインなど） --&gt;
+
+&lt;!-- 2) 既存サイトの &lt;head&gt; に1行追加 --&gt;
+&lt;script src="https://your-domain/floatdock.js" defer&gt;&lt;/script&gt;
+</code></pre>
+      </div>
+
+      <div class="code" aria-label="optional config code">
+<pre><code>&lt;!-- 任意：ページ側から設定を差し込む（デモ・検証向け） --&gt;
+&lt;script&gt;
+window.FLOATDOCK_CONFIG = {
+  lineUrl: "https://lin.ee/xxxxxx",
+  contactUrl: "tel:0120-000-000",
+  display: { desktop: "floating", mobile: "bottom-bar" },
+  hideOnScroll: { enabled: true }
+};
+&lt;/script&gt;
+&lt;script src="https://your-domain/floatdock.js" defer&gt;&lt;/script&gt;
+</code></pre>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px;">
+      <b>Recommended operational style</b>
+      <p>
+        本番運用は「設定も <code>floatdock.js</code> 内に内蔵」し、設置は <code>&lt;script&gt;</code> 1行だけにするのが最も安全・簡単です。
+        ページ側上書き（<code>window.FLOATDOCK_CONFIG</code>）はデモや検証用途に向きます。
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="config">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Config (minimal)</h2>
+    <div class="code">
+<pre><code>window.FLOATDOCK_CONFIG = {
+  breakpoint: 768,
+  lineUrl: "https://lin.ee/xxxxxx",
+  contactUrl: "/contact",
+  display: {
+    desktop: "floating",
+    mobile: "bottom-bar" // "bottom-bar" | "floating" | "expand-fab"
+  },
+  hideOnScroll: {
+    enabled: true,
+    hideDirection: "down",
+    hideAfter: 120,
+    minDelta: 10
+  }
+};</code></pre>
+    </div>
+
+    <div class="small" style="margin-top:12px;">
+      さらに細かい設定（色、位置、FAB items、アイコン等）は <code>floatdock.js</code> のデフォルト値を参照してください。
+    </div>
+
+    <div class="hr"></div>
+
+    <h3 style="margin:0 0 10px 0; font-size:16px;">Common config tips</h3>
+    <div>
+      <span class="tag good">lineUrl</span>
+      <span class="tag good">contactUrl</span>
+      <span class="tag warn">breakpoint</span>
+      <span class="tag blue">display.mobile</span>
+      <span class="tag blue">hideOnScroll</span>
+    </div>
+    <ul class="list">
+      <li><b>電話導線</b>は <code>tel:</code> を使えます（例: <code>tel:0120-000-000</code>）。</li>
+      <li><b>外部URL</b>は原則新規タブ、同一オリジンは同一タブに遷移する挙動（実装側で変更可）。</li>
+      <li><b>スマホ回転</b>・ウィンドウサイズ変更に追従して自動でモードを切り替えます。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- =========================================================
+     追加：制約（CSP/設置方法/SPA）説明
+========================================================== -->
+<section class="section" id="constraints">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Constraints / Why it may not work</h2>
+
+    <div class="two">
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">1) CSP (Content Security Policy)</b>
+        <div class="small">
+          サイト側で CSP が厳しい場合、以下がブロックされることがあります。
+          <ul class="list">
+            <li>外部ドメインの <code>&lt;script&gt;</code> 読み込み</li>
+            <li><code>&lt;style&gt;</code> の動的挿入（表示は出てもCSSが当たらない）</li>
+          </ul>
+
+          <div class="callout" style="margin-top:10px;">
+            <b>How to check</b>
+            <p>
+              DevTools → Network → 対象HTML → Response headers に
+              <code>Content-Security-Policy</code> または <code>Content-Security-Policy-Report-Only</code>
+              があるか確認してください。
+            </p>
+          </div>
+
+          <div class="callout" style="margin-top:10px;">
+            <b>Typical blocking example</b>
+            <p><code>Content-Security-Policy: script-src 'self';</code></p>
+          </div>
+
+          <div class="callout" style="margin-top:10px;">
+            <b>Workarounds</b>
+            <p>
+              最も確実：<strong>floatdock.js を同一ドメインに設置</strong>。<br/>
+              CSPを変更できる場合：<code>script-src</code> に配布先ドメインを許可し、必要なら
+              <code>style-src</code> 側も調整してください（管理者・制作会社への依頼が必要です）。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">2) Tag Manager / 3rd-party injection</b>
+        <div class="small">
+          GTM等のタグマネージャ経由で設置する場合、環境によっては
+          <code>position: fixed</code> や <code>z-index</code> の挙動が想定と異なることがあります。
+          <ul class="list">
+            <li>推奨：<b>&lt;head&gt; に直接 &lt;script&gt; を追加</b></li>
+            <li>代替：同一ドメイン配信 + CSP調整</li>
+          </ul>
+
+          <div class="hr"></div>
+
+          <b style="display:block;margin-bottom:8px;">3) SPA / Client-side routing</b>
+          <div class="small">
+            React/Vueなどでページ遷移時にDOMが再生成される場合、ウィジェットが消えることがあります。<br/>
+            その場合はルーティング後に <code>LineWidget.update()</code> を呼び出してください。
+          </div>
+          <div class="code" style="margin-top:10px;">
+<pre><code>// Example (after route change)
+if (window.LineWidget && typeof window.LineWidget.update === "function") {
+  window.LineWidget.update();
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px;">
+      <b>Terminology note</b>
+      <p>
+        ここで言う「CSP」はセキュリティヘッダの <b>Content Security Policy</b> を指します
+        （CPA=広告指標とは別です）。CSPが有効だと、外部JSの読み込みや動的CSS注入が制限される場合があります。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     追加：計測（GA4）・アクセシビリティ・推奨構成
+========================================================== -->
+<section class="section" id="useful">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Useful notes</h2>
+
+    <div class="two">
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Click tracking (GA4 / Ads)</b>
+        <div class="small">
+          floatdock は計測SDKに依存しません。必要ならクリックイベントで <code>gtag</code> / <code>dataLayer</code> などを呼び出してください。
+        </div>
+        <div class="code" style="margin-top:10px;">
+<pre><code>// Example: GA4 event
+a.addEventListener("click", function () {
+  if (window.gtag) {
+    gtag("event", "click", {
+      event_category: "floatdock",
+      event_label: "line"
+    });
+  }
+});</code></pre>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Accessibility (basic)</b>
+        <div class="small">
+          ボタンには <code>aria-label</code> を付与し、基本的な操作性を確保します。<br/>
+          WCAG等の厳密準拠が必要な場合は、フォーカス制御やキーボード操作の拡張を推奨します。
+        </div>
+
+        <div class="hr"></div>
+        <b style="display:block;margin-bottom:8px;">Trademark / icons</b>
+        <div class="small">
+          floatdock は商標ロゴ画像に依存しません（汎用SVGを使用）。<br/>
+          公式ロゴを使う場合は各サービスのガイドラインに従ってください。
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <h3 style="margin:0 0 10px 0; font-size:16px;">Suggested repository structure</h3>
+    <div class="code">
+<pre><code>floatdock/
+  floatdock.js
+  docs/
+    index.html   # this landing page (GitHub Pages)
+  README.md
+  LICENSE</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     追加：トラブルシューティング
+========================================================== -->
+<section class="section" id="troubleshoot">
+  <div class="wrap">
+    <h2 style="margin:0 0 12px 0; font-size:18px;">Troubleshooting</h2>
+
+    <div class="two">
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Not showing</b>
+        <ul class="list">
+          <li>CSPで <code>script-src</code> が制限されていないか（#Constraints参照）</li>
+          <li><code>floatdock.js</code> が 404 になっていないか（Networkで確認）</li>
+          <li>他要素の <code>z-index</code> が極端に高くないか</li>
+          <li>画面幅が <code>breakpoint</code> を跨いでモードが変わっていないか</li>
+        </ul>
+      </div>
+
+      <div class="card pad">
+        <b style="display:block;margin-bottom:8px;">Cannot click</b>
+        <ul class="list">
+          <li>上に透明な要素が被っていないか（DevToolsで要素確認）</li>
+          <li>親要素に <code>pointer-events: none</code> が掛かっていないか</li>
+          <li>iframe内で動かしている場合は、親側の制限により挙動が変わることがあります</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <b style="display:block;margin-bottom:8px;">SPA pages (disappear after navigation)</b>
+        <div class="small">ルーティング後に再生成してください。</div>
+        <div class="code" style="margin-top:10px;">
+          <pre><code>window.LineWidget?.update?.();</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px;">
+      <b>Support tip</b>
+      <p>
+        問題が出る場合、まず「対象ページのレスポンスヘッダ（CSPの有無）」と「Consoleのエラー」を確認すると原因切り分けが速くなります。
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div>
+        <b>floatdock</b>
+        <div class="small">Tiny CTA widget for existing websites.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn" href="#demo">Back to top</a>
+        <a class="btn primary" href="https://github.com/monou-jp/floatdock">GitHub</a>
+      </div>
+    </div>
+    <div class="small" style="margin-top:10px;">
+      Created by <a href="https://monou.jp" style="text-decoration:underline;font-weight:bold;">門王 (monou.jp)</a>
+      <div style="margin-top:4px;opacity:0.8;">
+        このような各種JavaScriptツール・ウィジェットの制作依頼も承っております。お気軽にご相談ください。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- preview mock switching (visual only) ----
+  var segBar = document.getElementById("segBar");
+  var segFloat = document.getElementById("segFloat");
+  var segFab = document.getElementById("segFab");
+  var segHide = document.getElementById("segHide");
+
+  var demoBar = document.getElementById("demoBar");
+  var demoFloat = document.getElementById("demoFloat");
+  var demoFab = document.getElementById("demoFab");
+  var fabMain = document.getElementById("fabMain");
+
+  function setActive(btn) {
+    [segBar, segFloat, segFab].forEach(function (b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+  }
+  function showMode(mode) {
+    demoBar.style.display = mode === "bottom-bar" ? "flex" : "none";
+    demoFloat.style.display = mode === "floating" ? "flex" : "none";
+    demoFab.style.display = mode === "expand-fab" ? "flex" : "none";
+    demoFab.classList.remove("open");
+  }
+
+  segBar.addEventListener("click", function () { setActive(segBar); showMode("bottom-bar"); });
+  segFloat.addEventListener("click", function () { setActive(segFloat); showMode("floating"); });
+  segFab.addEventListener("click", function () { setActive(segFab); showMode("expand-fab"); });
+
+  fabMain.addEventListener("click", function () {
+    demoFab.classList.toggle("open");
+  });
+
+  // hide-on-scroll visual mock
+  var mock = document.getElementById("mock");
+  var lastY = 0;
+  window.addEventListener("scroll", function () {
+    if (!segHide.checked) {
+      demoBar.style.opacity = "1";
+      demoFloat.style.opacity = "1";
+      demoFab.style.opacity = "1";
+      return;
+    }
+    var y = window.pageYOffset || 0;
+    var dy = y - lastY;
+    lastY = y;
+
+    if (y > 120 && dy > 0) {
+      demoBar.style.opacity = "0";
+      demoFloat.style.opacity = "0";
+      demoFab.style.opacity = "0";
+    } else {
+      demoBar.style.opacity = "1";
+      demoFloat.style.opacity = "1";
+      demoFab.style.opacity = "1";
+    }
+  });
+
+  // initial
+  showMode("bottom-bar");
+
+  // ---- optional: sync to real floatdock (if your floatdock reads window.FLOATDOCK_CONFIG) ----
+  function applyToReal(mode) {
+    try {
+      window.FLOATDOCK_CONFIG = window.FLOATDOCK_CONFIG || {};
+      window.FLOATDOCK_CONFIG.display = window.FLOATDOCK_CONFIG.display || { desktop: "floating", mobile: "bottom-bar" };
+      window.FLOATDOCK_CONFIG.display.mobile = mode;
+
+      window.FLOATDOCK_CONFIG.hideOnScroll = window.FLOATDOCK_CONFIG.hideOnScroll || {};
+      window.FLOATDOCK_CONFIG.hideOnScroll.enabled = !!segHide.checked;
+
+      if (window.LineWidget && typeof window.LineWidget.update === "function") {
+        window.LineWidget.update();
+      }
+    } catch (e) {}
+  }
+
+  segBar.addEventListener("click", function(){ applyToReal("bottom-bar"); });
+  segFloat.addEventListener("click", function(){ applyToReal("floating"); });
+  segFab.addEventListener("click", function(){ applyToReal("expand-fab"); });
+  segHide.addEventListener("change", function(){
+    var active = segBar.classList.contains("active") ? "bottom-bar" :
+            segFloat.classList.contains("active") ? "floating" : "expand-fab";
+    applyToReal(active);
+  });
+</script>
+
+<!--
+  ============================================================
+  この紹介ページを floatdock の実デモとして動かすための注意
+  ============================================================
+  あなたの floatdock.js が「ページ側設定」を読むなら、初期化で
+    cfg = deepMerge(DEFAULTS, window.FLOATDOCK_CONFIG || CONFIG);
+  のようにしておくと、このページのモード切替がそのまま反映されます。
+-->
+</body>
+</html>
