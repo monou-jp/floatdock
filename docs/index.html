@@ -6,309 +6,160 @@
   <title>floatdock — Tiny CTA widget for existing websites</title>
   <meta name="description" content="floatdock: Add floating / bottom-bar / expand-fab CTA UI to existing websites with a single script tag." />
 
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
   <style>
     :root{
       --bg0:#070b14;
       --bg1:#0b1220;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.08);
+      --card-bg: rgba(255,255,255,.06);
+      --card-bg-hover: rgba(255,255,255,.08);
       --line: rgba(255,255,255,.12);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.68);
-      --muted2: rgba(255,255,255,.54);
-      --accent: rgba(78,161,255,.95);
-      --good: rgba(46,204,113,.95);
-      --warn: rgba(241,196,15,.95);
-      --bad: rgba(231,76,60,.95);
-      --shadow: 0 30px 120px rgba(0,0,0,.55);
-      --radius: 18px;
+      --accent: #4ea1ff;
+      --good: #2ecc71;
+      --warn: #f1c40f;
+      --bad: #e74c3c;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      color:var(--text);
-      background:
-              radial-gradient(1100px 420px at 20% -10%, rgba(78,161,255,.35), transparent 60%),
-              radial-gradient(1000px 380px at 90% 5%, rgba(46,204,113,.22), transparent 58%),
-              radial-gradient(900px 520px at 70% 110%, rgba(241,196,15,.10), transparent 52%),
-              linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg0));
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,
-      "Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    .text-muted, .text-secondary { color: var(--muted) !important; }
+    body {
+      color: var(--text);
+      background: 
+        radial-gradient(1100px 420px at 20% -10%, rgba(78,161,255,.2), transparent 60%),
+        radial-gradient(1000px 380px at 90% 5%, rgba(46,204,113,.15), transparent 58%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 45%, var(--bg0));
+      font-family: system-ui,-apple-system,sans-serif;
+      overflow-x: hidden;
     }
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-    .nav{
-      position:sticky;top:0;z-index:20;
-      background: rgba(11,18,32,.72);
+    .navbar {
+      background: rgba(11,18,32,.8) !important;
       backdrop-filter: blur(10px);
-      border-bottom:1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid var(--line);
     }
-    .nav-inner{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:14px 0;gap:12px;
-    }
-    .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px;}
-    .logo-badge{
-      width:34px;height:34px;border-radius:12px;
-      background: linear-gradient(135deg, rgba(78,161,255,.9), rgba(46,204,113,.85));
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,.18);
-    }
-    .logo-badge svg{display:block}
-    .nav-links{
-      display:flex;gap:14px;align-items:center;
-      color:var(--muted);
-      font-size:13px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .nav-links a:hover{color:var(--text)}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      padding:10px 12px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-weight:800;font-size:13px;
-    }
-    .btn.primary{
-      background: rgba(78,161,255,.16);
-      border-color: rgba(78,161,255,.35);
-    }
-    .btn:hover{filter:brightness(1.05)}
-    .hero{padding:54px 0 10px;}
-    .hero-grid{display:grid;gap:18px;grid-template-columns: 1fr;}
-    @media (min-width: 980px){
-      .hero-grid{grid-template-columns: 1.1fr .9fr; align-items:start;}
-    }
-    .h-title{font-size:40px;line-height:1.05;margin:0;letter-spacing:-.6px;}
-    @media (min-width: 980px){ .h-title{font-size:52px;} }
-    .h-sub{
-      margin:12px 0 0;color:var(--muted);
-      line-height:1.8;font-size:15px;
-      max-width:60ch;
-    }
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-    .chip{
-      padding:7px 10px;border-radius:999px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:var(--muted);
-      font-size:12px;font-weight:800;
-    }
-    .chip.good{border-color: rgba(46,204,113,.28); background: rgba(46,204,113,.10); color: rgba(225,255,236,.9);}
-    .chip.blue{border-color: rgba(78,161,255,.28); background: rgba(78,161,255,.10); color: rgba(224,240,255,.92);}
-    .chip.warn{border-color: rgba(241,196,15,.28); background: rgba(241,196,15,.09); color: rgba(255,248,224,.92);}
-    .chip.bad{border-color: rgba(231,76,60,.28); background: rgba(231,76,60,.09); color: rgba(255,233,233,.92);}
-    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-    .card{
-      background: var(--card);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .card.pad{padding:16px}
-    .preview{
-      padding:16px;
-      border-radius: var(--radius);
-      border:1px solid rgba(255,255,255,.10);
-      background:
-              radial-gradient(900px 240px at 20% 0%, rgba(78,161,255,.16), transparent 62%),
-              rgba(255,255,255,.04);
-      overflow:hidden;
-    }
-    .preview-top{
-      display:flex;align-items:center;justify-content:space-between;
-      margin-bottom:14px;gap:10px;flex-wrap:wrap;
-    }
-    .seg{
-      display:flex;gap:6px;flex-wrap:wrap;
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.10);
-      padding:6px;border-radius:16px;
-    }
-    .seg button{
-      border:1px solid transparent;
-      background: transparent;
-      color: var(--muted);
-      padding:9px 10px;border-radius:12px;
-      font-weight:900;font-size:12px;cursor:pointer;
-    }
-    .seg button.active{
-      background: rgba(78,161,255,.18);
-      border-color: rgba(78,161,255,.30);
-      color: rgba(224,240,255,.95);
-    }
-    .tog{
-      display:flex;align-items:center;gap:10px;
-      color:var(--muted);
-      font-size:12px;font-weight:800;
-      user-select:none;
-    }
-    .tog input{transform:scale(1.1)}
-    .mock{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      overflow:hidden;
-    }
-    .mockbar{
-      display:flex;align-items:center;gap:6px;
-      padding:10px 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      color: rgba(255,255,255,.55);
-      font-size:12px;font-weight:800;
-    }
-    .dot{width:10px;height:10px;border-radius:999px;background: rgba(255,255,255,.20)}
-    .mockbody{
-      padding:16px;
-      height: 280px;
-      display:grid;
-      gap:12px;
-      position:relative;
-    }
-    .ph{
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding:12px;
-      color: rgba(255,255,255,.55);
-      font-size:12px;
-      line-height:1.6;
-    }
-    .section{padding:36px 0}
-    .grid{display:grid;gap:12px;grid-template-columns: 1fr;}
-    @media (min-width: 860px){ .grid{grid-template-columns: 1fr 1fr 1fr;} }
-    .feat{
-      padding:16px;border-radius: var(--radius);
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .feat b{display:block;margin-bottom:6px}
-    .feat p{margin:0;color:var(--muted);line-height:1.7;font-size:13px}
-    .code{
-      background: rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 16px;
-      padding:14px;
-      overflow:auto;
-      box-shadow: 0 25px 90px rgba(0,0,0,.45);
-    }
-    pre{margin:0;white-space:pre;line-height:1.6}
-    code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12px;
-      color: rgba(228,240,255,.95);
-    }
-    .two{display:grid;gap:12px;grid-template-columns:1fr;}
-    @media (min-width: 980px){ .two{grid-template-columns: 1fr 1fr;} }
-    .small{font-size:12px;color:var(--muted2);line-height:1.7}
-    .hr{height:1px;background: rgba(255,255,255,.10);margin:18px 0;}
-    .footer{
-      padding:28px 0 80px;
-      border-top:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.18);
-      color:var(--muted);
-    }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12px;
-      padding:.15em .45em;
-      border:1px solid rgba(255,255,255,.2);
-      border-bottom-color: rgba(255,255,255,.12);
-      border-radius:8px;
-      background:rgba(0,0,0,.25);
-    }
-    .callout{
-      padding:14px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
-    .callout b{display:block;margin-bottom:6px}
-    .callout p{margin:0;color:var(--muted);line-height:1.8;font-size:13px}
-    .list{
-      margin:10px 0 0 0;
-      padding-left: 18px;
-      color: var(--muted);
-      line-height: 1.8;
-      font-size: 13px;
-    }
-    .tag{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-weight: 900;
-      font-size: 12px;
-      margin: 0 6px 6px 0;
-      white-space: nowrap;
-    }
-    .tag.good{border-color: rgba(46,204,113,.24); background: rgba(46,204,113,.09); color: rgba(225,255,236,.88);}
-    .tag.warn{border-color: rgba(241,196,15,.24); background: rgba(241,196,15,.08); color: rgba(255,248,224,.9);}
-    .tag.bad{border-color: rgba(231,76,60,.24); background: rgba(231,76,60,.08); color: rgba(255,233,233,.9);}
+    .navbar-brand { font-weight: 900; color: var(--text) !important; }
+    .nav-link { color: var(--muted) !important; font-size: 0.9rem; font-weight: 600; }
+    .nav-link:hover { color: var(--text) !important; }
 
-    /* ---------- demo widgets inside the mock --------- */
-    .demo-float{
-      position:absolute;
-      right: 14px; bottom: 14px;
-      display:flex;align-items:center;justify-content:center;
-      width:56px;height:56px;border-radius:999px;
-      background: linear-gradient(135deg, rgba(78,161,255,.95), rgba(46,204,113,.90));
-      box-shadow: 0 20px 60px rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.18);
-      color:white;
+    .logo-badge {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--good));
+      display: flex; align-items: center; justify-content: center;
+      margin-right: 10px;
     }
-    .demo-bar{
-      position:absolute;left:0;right:0;bottom:0;
-      display:flex;overflow:hidden;
-      border-top-left-radius:18px;border-top-right-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      border-bottom: none;
-      box-shadow: 0 25px 80px rgba(0,0,0,.55);
+
+    .hero-section { padding: 80px 0 40px; }
+    .h-title { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
+    @media (max-width: 768px) { .h-title { font-size: 2.5rem; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--text);
+      backdrop-filter: blur(5px);
     }
-    .demo-bar a{
-      flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
-      height:64px;font-weight:900;font-size:13px;
-      color:white;
+    .card-title { font-weight: 800; font-size: 1.1rem; }
+    .card-text { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+    .btn-primary-custom {
+      background: rgba(78,161,255,.2);
+      border: 1px solid rgba(78,161,255,.4);
+      color: #fff;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 10px 20px;
     }
-    .demo-bar .left{background: rgba(229,57,53,.95)}
-    .demo-bar .right{background: rgba(6,199,85,.95)}
-    .demo-fab{
-      position:absolute;right:14px;bottom:14px;
-      display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+    .btn-primary-custom:hover {
+      background: rgba(78,161,255,.3);
+      border-color: rgba(78,161,255,.6);
+      color: #fff;
     }
-    .demo-fab .main{
-      width:56px;height:56px;border-radius:999px;
-      background: rgba(6,199,85,.95);
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow: 0 20px 60px rgba(0,0,0,.45);
-      color:white;
-      cursor:pointer;
+    .btn-outline-custom {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+      border-radius: 10px;
     }
-    .demo-fab .items{display:none;flex-direction:column;gap:10px;align-items:flex-end}
-    .demo-fab.open .items{display:flex}
-    .demo-fab .item{
-      display:flex;align-items:center;gap:10px;
-      background: rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:999px;
-      padding:10px 12px;
-      color:white;
-      font-weight:900;font-size:12px;
+    .btn-outline-custom:hover {
+      background: rgba(255,255,255,.1);
+      color: var(--text);
     }
-    .demo-fab .bubble{
-      width:44px;height:44px;border-radius:999px;
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+
+    .chip {
+      display: inline-block; padding: 5px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 800; margin-right: 5px; margin-bottom: 10px;
+      background: rgba(255,255,255,.05); border: 1px solid var(--line);
     }
-    .bg-red{background: rgba(229,57,53,.95)}
-    .bg-green{background: rgba(6,199,85,.95)}
-    .bg-blue{background: rgba(30,136,229,.95)}
+    .chip.good { border-color: rgba(46,204,113,.4); color: var(--good); background: rgba(46,204,113,.1); }
+    .chip.blue { border-color: rgba(78,161,255,.4); color: var(--accent); background: rgba(78,161,255,.1); }
+    .chip.warn { border-color: rgba(241,196,15,.4); color: var(--warn); background: rgba(241,196,15,.1); }
+
+    .kbd {
+      font-family: monospace; font-size: 0.85rem; padding: 2px 6px;
+      background: rgba(0,0,0,.3); border: 1px solid var(--line); border-radius: 4px;
+    }
+
+    .preview-container {
+      background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 20px; padding: 20px;
+    }
+    .mock-window {
+      background: #000; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: relative;
+      height: 320px;
+    }
+    .mock-header {
+      background: rgba(255,255,255,.05); padding: 8px 15px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.2); }
+
+    /* Demo Widget Styles */
+    .demo-float {
+      position: absolute; right: 15px; bottom: 15px; width: 50px; height: 50px;
+      border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--good));
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    }
+    .demo-bar {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 60px;
+      display: flex; border-top: 1px solid var(--line);
+    }
+    .demo-bar a { flex: 1; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; text-decoration: none; }
+    .demo-bar .left { background: #e53935; border-top-left-radius: 12px; }
+    .demo-bar .right { background: #06c755; border-top-right-radius: 12px; }
+
+    .demo-fab { position: absolute; right: 15px; bottom: 15px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .demo-fab .items { display: none; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .demo-fab.open .items { display: flex; }
+    .demo-fab .main {
+      width: 50px; height: 50px; border-radius: 50%; background: #06c755;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .demo-fab .item {
+      background: rgba(0,0,0,.8); border: 1px solid var(--line); border-radius: 30px; padding: 6px 12px;
+      display: flex; align-items: center; gap: 8px; color: #fff; font-size: 0.75rem; font-weight: 800;
+    }
+    .demo-fab .bubble { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    .code-block {
+      background: #0d1117; border: 1px solid var(--line); border-radius: 12px; padding: 15px; margin: 15px 0;
+      position: relative; overflow-x: auto;
+    }
+    pre { margin: 0; }
+    code { color: #c9d1d9; font-size: 0.85rem; }
+
+    .footer { border-top: 1px solid var(--line); padding: 50px 0; background: rgba(0,0,0,.2); }
+
+    .mode-btn {
+      background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--muted);
+      padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem;
+    }
+    .mode-btn.active { background: rgba(78,161,255,.2); border-color: var(--accent); color: #fff; }
+
+    section { scroll-margin-top: 80px; }
   </style>
 
   <!-- =========================================================
@@ -342,47 +193,54 @@
 </head>
 
 <body>
-<div class="nav">
-  <div class="wrap">
-    <div class="nav-inner">
-      <div class="logo">
-        <div class="logo-badge" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M20 12c0 3.8-3.6 6.9-8 6.9-1 0-2-.2-2.9-.5L4 20l1.3-3.2C4.5 15.7 4 13.9 4 12c0-3.8 3.6-6.9 8-6.9s8 3.1 8 6.9Z" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <div style="font-size:14px;">floatdock</div>
-          <div style="font-size:12px;color:var(--muted);font-weight:800;">Tiny CTA widget</div>
-        </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top navbar-dark">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <div class="logo-badge" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M20 12c0 3.8-3.6 6.9-8 6.9-1 0-2-.2-2.9-.5L4 20l1.3-3.2C4.5 15.7 4 13.9 4 12c0-3.8 3.6-6.9 8-6.9s8 3.1 8 6.9Z" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.92)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </div>
-
-      <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#modes">Modes</a>
-        <a href="#usage">Usage</a>
-        <a href="#config">Config</a>
-        <a href="#constraints">Constraints</a>
-        <a href="#troubleshoot">Troubleshoot</a>
-        <a href="https://github.com/monou-jp/floatdock" class="btn">GitHub</a>
+      <div>
+        <div style="font-size:16px; line-height:1;">floatdock</div>
+        <div style="font-size:10px; color:var(--muted); font-weight:800; letter-spacing:0.5px;">Tiny CTA widget</div>
       </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#modes">Modes</a></li>
+        <li class="nav-item"><a class="nav-link" href="#usage">Usage</a></li>
+        <li class="nav-item"><a class="nav-link" href="#config">Config</a></li>
+        <li class="nav-item"><a class="nav-link" href="#constraints">Constraints</a></li>
+        <li class="nav-item ms-lg-3">
+          <a class="btn btn-outline-custom px-3 py-2" href="https://github.com/monou-jp/floatdock">
+            <i class="bi bi-github me-1"></i> GitHub
+          </a>
+        </li>
+      </ul>
     </div>
   </div>
-</div>
+</nav>
 
-<section class="hero" id="demo">
-  <div class="wrap">
-    <div class="hero-grid">
-      <div>
+<!-- Hero Section -->
+<section class="hero-section" id="demo">
+  <div class="container">
+    <div class="row align-items-start g-5">
+      <div class="col-lg-7">
         <h1 class="h-title">Add CTA UI to any site<br/>with one script tag.</h1>
-        <p class="h-sub">
+        <p class="lead mb-4" style="color:var(--muted); font-size: 1.1rem; line-height: 1.7;">
           floatdock は、既存サイトに <span class="kbd">&lt;script&gt;</span> 1行で
           <b>フローティング</b> / <b>下部固定</b> / <b>展開メニュー（FAB）</b> の導線UIを追加する軽量ウィジェットです。
           PCとスマホで表示方式を切り替え、スクロール時に隠す挙動も設定できます。
         </p>
 
-        <div class="chips">
+        <div class="mb-4">
           <span class="chip good">Vanilla JS</span>
           <span class="chip blue">No dependencies</span>
           <span class="chip good">Single file</span>
@@ -390,222 +248,211 @@
           <span class="chip blue">3 mobile modes</span>
         </div>
 
-        <div class="hero-actions">
-          <a class="btn primary" href="#usage">Quick start</a>
-          <a class="btn" href="#constraints">Constraints / CSP</a>
-          <a class="btn" href="#config">Config reference</a>
+        <div class="d-flex flex-wrap gap-2 mb-5">
+          <a class="btn btn-primary-custom" href="#usage">Quick start</a>
+          <a class="btn btn-outline-custom" href="#constraints">Constraints / CSP</a>
+          <a class="btn btn-outline-custom" href="#config">Config reference</a>
         </div>
 
-        <div class="hr"></div>
-        <div class="small">
-          このページは「紹介ページ」用のサンプルです。上のプレビューは見た目のモックで、
-          実際の floatdock はこのページ末尾で読み込まれます（<code>./floatdock.js</code>）。
+        <div class="pt-4 border-top" style="border-color: rgba(255,255,255,.1) !important;">
+          <p class="small text-muted mb-0">
+            このページは「紹介ページ」用のサンプルです。右のプレビューは見た目のモックで、
+            実際の floatdock はこのページ末尾で読み込まれます（<code>./floatdock.js</code>）。
+          </p>
         </div>
       </div>
 
-      <div class="card">
-        <div class="preview">
-          <div class="preview-top">
-            <div class="seg" role="tablist" aria-label="Mode selector">
-              <button id="segBar" class="active" type="button">bottom-bar</button>
-              <button id="segFloat" type="button">floating</button>
-              <button id="segFab" type="button">expand-fab</button>
+      <div class="col-lg-5">
+        <div class="preview-container">
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div class="btn-group btn-group-sm" role="group">
+              <button id="segBar" class="mode-btn active" type="button">bottom-bar</button>
+              <button id="segFloat" class="mode-btn" type="button">floating</button>
+              <button id="segFab" class="mode-btn" type="button">expand-fab</button>
             </div>
-            <label class="tog">
-              <input id="segHide" type="checkbox" checked />
-              hide on scroll
-            </label>
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" id="segHide" checked>
+              <label class="form-check-label small text-muted fw-bold" for="segHide">hide on scroll</label>
+            </div>
           </div>
 
-          <div class="mock" id="mock">
-            <div class="mockbar">
+          <div class="mock-window" id="mock">
+            <div class="mock-header">
               <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <span style="margin-left:8px;">Preview</span>
-              <span style="margin-left:auto;color:rgba(255,255,255,.45);font-weight:800;">(visual mock)</span>
+              <span class="ms-2 small fw-bold text-secondary">Preview (visual mock)</span>
             </div>
-            <div class="mockbody">
-              <div class="ph">Hero section / content block</div>
-              <div class="ph">Long page… (scroll to see hide/show)</div>
-              <div class="ph">CTA should stay accessible</div>
-
-              <!-- bottom bar -->
-              <div class="demo-bar" id="demoBar" aria-hidden="true">
-                <a class="left" href="javascript:void(0)">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6.5 3.5l3 2-1.2 2.4c-.2.4-.1.9.2 1.2l3.4 3.4c.3.3.8.4 1.2.2L15.5 12l2 3c.4.6.3 1.4-.2 1.9l-1.3 1.3c-.7.7-1.7 1-2.7.7-2.6-.7-5.2-2.5-7.5-4.8S2.7 9.2 2 6.6c-.3-1 .0-2 .7-2.7L4 2.6c.5-.5 1.3-.6 2-.1Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
-                  </svg>
-                  <span>CALL</span>
-                </a>
-                <a class="right" href="javascript:void(0)">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                  <span>LINE</span>
-                </a>
+            <div class="p-3">
+              <div class="card p-3 mb-2" style="background: rgba(255,255,255,.03); border-style: dashed;">
+                <p class="small mb-0 text-muted">Hero section / content block</p>
+              </div>
+              <div class="card p-3 mb-2" style="background: rgba(255,255,255,.03); border-style: dashed;">
+                <p class="small mb-0 text-muted">Long page… (scroll to see hide/show)</p>
+              </div>
+              <div class="card p-3" style="background: rgba(255,255,255,.03); border-style: dashed;">
+                <p class="small mb-0 text-muted">CTA should stay accessible</p>
               </div>
 
-              <!-- floating -->
-              <div class="demo-float" id="demoFloat" aria-hidden="true" style="display:none;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
-                  <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
-                </svg>
+              <!-- Mock widgets -->
+              <div class="demo-bar" id="demoBar">
+                <a class="left" href="javascript:void(0)"><i class="bi bi-telephone-fill me-2"></i> CALL</a>
+                <a class="right" href="javascript:void(0)"><i class="bi bi-chat-fill me-2"></i> LINE</a>
               </div>
-
-              <!-- expand fab -->
-              <div class="demo-fab" id="demoFab" aria-hidden="true" style="display:none;">
+              <div class="demo-float" id="demoFloat" style="display:none;">
+                <i class="bi bi-chat-fill fs-4 text-white"></i>
+              </div>
+              <div class="demo-fab" id="demoFab" style="display:none;">
                 <div class="items">
-                  <div class="item">
-                    <span style="opacity:.92;">CALL</span>
-                    <span class="bubble bg-red">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M6.5 3.5l3 2-1.2 2.4c-.2.4-.1.9.2 1.2l3.4 3.4c.3.3.8.4 1.2.2L15.5 12l2 3c.4.6.3 1.4-.2 1.9l-1.3 1.3c-.7.7-1.7 1-2.7.7-2.6-.7-5.2-2.5-7.5-4.8S2.7 9.2 2 6.6c-.3-1 .0-2 .7-2.7L4 2.6c.5-.5 1.3-.6 2-.1Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
-                        </svg>
-                      </span>
-                  </div>
-                  <div class="item">
-                    <span style="opacity:.92;">LINE</span>
-                    <span class="bubble bg-green">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M20 11.8c0 3.7-3.6 6.7-8 6.7-1 0-2-.2-2.9-.5L4 19.4l1.3-3.1C4.5 15.2 4 13.6 4 11.8 4 8.1 7.6 5.1 12 5.1s8 3 8 6.7Z" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linejoin="round"/>
-                          <path d="M9 12h6M9 9.8h6" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                      </span>
-                  </div>
-                  <div class="item">
-                    <span style="opacity:.92;">BOOK</span>
-                    <span class="bubble bg-blue">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M7 3v3M17 3v3" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
-                          <path d="M4 8h16v12H4V8Z" stroke="rgba(255,255,255,.95)" stroke-width="2"/>
-                          <path d="M4 11h16" stroke="rgba(255,255,255,.95)" stroke-width="2"/>
-                        </svg>
-                      </span>
-                  </div>
+                  <div class="item">CALL <span class="bubble bg-danger"><i class="bi bi-telephone-fill"></i></span></div>
+                  <div class="item">LINE <span class="bubble bg-success"><i class="bi bi-chat-fill"></i></span></div>
+                  <div class="item">BOOK <span class="bubble bg-primary"><i class="bi bi-calendar-check"></i></span></div>
                 </div>
-                <div class="main" id="fabMain" role="button" aria-label="open menu">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M5 7h14M5 12h14M5 17h14" stroke="rgba(255,255,255,.95)" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </div>
+                <div class="main" id="fabMain"><i class="bi bi-list fs-3 text-white"></i></div>
               </div>
-
             </div>
           </div>
-
-          <div class="small" style="margin-top:12px;">
-            <span class="kbd">bottom-bar</span> は店舗サイト導線、
-            <span class="kbd">floating</span> はLP向き、
-            <span class="kbd">expand-fab</span> はアクションが増える場合に有効です。
-          </div>
+          <p class="small text-muted mt-3 mb-0">
+            <span class="kbd">bottom-bar</span> は店舗サイト、<span class="kbd">floating</span> はLP、<span class="kbd">expand-fab</span> は多機能向け。
+          </p>
         </div>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section class="section" id="features">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px; letter-spacing:.2px;">Features</h2>
-    <div class="grid">
-      <div class="feat">
-        <b>Single script</b>
-        <p>既存サイトに <code>&lt;script src=".../floatdock.js"&gt;</code> 1行で導入できます。</p>
-      </div>
-      <div class="feat">
-        <b>Device modes</b>
-        <p>PC/スマホで表示方式を切替（スマホは 3モード）。</p>
-      </div>
-      <div class="feat">
-        <b>Hide on scroll</b>
-        <p>スクロール中は隠して、必要時だけ表示（設定で調整）。</p>
-      </div>
-      <div class="feat">
-        <b>Vanilla JS</b>
-        <p>依存ライブラリ無し。WordPress等でも扱いやすい構成です。</p>
-      </div>
-      <div class="feat">
-        <b>Customizable</b>
-        <p>文言、位置、サイズ、色、リンク先を設定可能。</p>
-      </div>
-      <div class="feat">
-        <b>Accessible (basic)</b>
-        <p>基本的な <code>aria-label</code> を付与（必要に応じて拡張）。</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section" id="modes">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Modes</h2>
-    <div class="two">
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Desktop</b>
-        <div class="small">
-          <div>• <span class="kbd">floating</span>（右下/右上/左下/左上）</div>
-          <div>• サイズ・文言・サブラベルを設定</div>
+<!-- Features -->
+<section class="py-5" id="features">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Features
+    </h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-primary fs-4"><i class="bi bi-code-square"></i></div>
+          <h3 class="card-title mb-2">Single script</h3>
+          <p class="card-text mb-0">既存サイトに <code>&lt;script&gt;</code> 1行で導入できます。設置の手間を最小限に。</p>
         </div>
       </div>
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Mobile</b>
-        <div class="small">
-          <div>• <span class="kbd">bottom-bar</span>：下部固定2ボタン</div>
-          <div>• <span class="kbd">floating</span>：丸/角丸ボタン</div>
-          <div>• <span class="kbd">expand-fab</span>：タップで縦展開メニュー</div>
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-success fs-4"><i class="bi bi-phone"></i></div>
+          <h3 class="card-title mb-2">Device modes</h3>
+          <p class="card-text mb-0">PC/スマホで表示方式を切替。スマホは用途に合わせた3つのモードを搭載。</p>
         </div>
       </div>
-    </div>
-    <div class="small" style="margin-top:10px;">
-      スマホ判定は <span class="kbd">window.innerWidth &lt; breakpoint</span>（User-Agentは使用しません）。
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-warning fs-4"><i class="bi bi-mouse3"></i></div>
+          <h3 class="card-title mb-2">Hide on scroll</h3>
+          <p class="card-text mb-0">スクロール中は隠して、必要時だけ表示。ユーザー体験を妨げません。</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-info fs-4"><i class="bi bi-lightning-fill"></i></div>
+          <h3 class="card-title mb-2">Vanilla JS</h3>
+          <p class="card-text mb-0">依存ライブラリ無し。軽量で WordPress 等のCMSでも動作が安定します。</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-danger fs-4"><i class="bi bi-sliders"></i></div>
+          <h3 class="card-title mb-2">Customizable</h3>
+          <p class="card-text mb-0">文言、色、リンク先はもちろん、表示位置やアニメーションも調整可能。</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 p-4 shadow-sm">
+          <div class="mb-3 text-white fs-4"><i class="bi bi-universal-access"></i></div>
+          <h3 class="card-title mb-2">Accessible</h3>
+          <p class="card-text mb-0">適切な <code>aria-label</code> を付与。最低限のアクセシビリティを確保。</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section" id="usage">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Quick start</h2>
-
-    <div class="two">
-      <div class="code" aria-label="embed code">
-<pre><code>&lt;!-- 1) floatdock.js を配置（GitHub Pages / 自社ドメインなど） --&gt;
-
-&lt;!-- 2) 既存サイトの &lt;head&gt; に1行追加 --&gt;
-&lt;script src="https://your-domain/floatdock.js" defer&gt;&lt;/script&gt;
-</code></pre>
+<!-- Modes Section -->
+<section class="py-5" id="modes">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Modes
+    </h2>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h3 class="card-title mb-3 d-flex align-items-center">
+            <i class="bi bi-laptop me-2"></i> Desktop
+          </h3>
+          <ul class="list-unstyled mb-0 small text-muted">
+            <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i> <span class="kbd">floating</span>（右下/右上/左下/左上）</li>
+            <li><i class="bi bi-check2 text-primary me-2"></i> サイズ・文言・サブラベルを設定可能</li>
+          </ul>
+        </div>
       </div>
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h3 class="card-title mb-3 d-flex align-items-center">
+            <i class="bi bi-phone me-2"></i> Mobile
+          </h3>
+          <ul class="list-unstyled mb-0 small text-muted">
+            <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i> <span class="kbd">bottom-bar</span>：下部固定2ボタン</li>
+            <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i> <span class="kbd">floating</span>：丸型または角丸ボタン</li>
+            <li><i class="bi bi-check2 text-primary me-2"></i> <span class="kbd">expand-fab</span>：タップで縦展開メニュー</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="small text-muted mt-3">
+      ※ スマホ判定は <span class="kbd">window.innerWidth &lt; breakpoint</span> で行われます。
+    </p>
+  </div>
+</section>
 
-      <div class="code" aria-label="optional config code">
-<pre><code>&lt;!-- 任意：ページ側から設定を差し込む（デモ・検証向け） --&gt;
-&lt;script&gt;
+<!-- Usage -->
+<section class="py-5" id="usage">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Quick start
+    </h2>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="code-block">
+          <div class="small text-secondary mb-2">// 1) HTMLの &lt;head&gt; 内に追加</div>
+          <code>&lt;script src="https://path/to/floatdock.js" defer&gt;&lt;/script&gt;</code>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="code-block">
+          <div class="small text-secondary mb-2">// 2) ページ側から設定を上書きする場合</div>
+          <pre><code>&lt;script&gt;
 window.FLOATDOCK_CONFIG = {
   lineUrl: "https://lin.ee/xxxxxx",
-  contactUrl: "tel:0120-000-000",
-  display: { desktop: "floating", mobile: "bottom-bar" },
+  display: { mobile: "bottom-bar" },
   hideOnScroll: { enabled: true }
 };
-&lt;/script&gt;
-&lt;script src="https://your-domain/floatdock.js" defer&gt;&lt;/script&gt;
-</code></pre>
+&lt;/script&gt;</code></pre>
+        </div>
       </div>
     </div>
-
-    <div class="callout" style="margin-top:12px;">
-      <b>Recommended operational style</b>
-      <p>
-        本番運用は「設定も <code>floatdock.js</code> 内に内蔵」し、設置は <code>&lt;script&gt;</code> 1行だけにするのが最も安全・簡単です。
-        ページ側上書き（<code>window.FLOATDOCK_CONFIG</code>）はデモや検証用途に向きます。
+    <div class="alert alert-dark border-secondary mt-4 p-4 rounded-4 shadow-sm" style="background: rgba(255,255,255,.05);">
+      <h4 class="h6 fw-bold mb-2"><i class="bi bi-info-circle me-2"></i> Recommended operational style</h4>
+      <p class="small text-muted mb-0">
+        本番運用は「設定を <code>floatdock.js</code> 内に内蔵」し、設置は <code>&lt;script&gt;</code> 1行だけにするのが最も安全・簡単です。
       </p>
     </div>
   </div>
 </section>
 
-<section class="section" id="config">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Config (minimal)</h2>
-    <div class="code">
+<!-- Config -->
+<section class="py-5" id="config">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Config reference
+    </h2>
+    <div class="row">
+      <div class="col-12">
+        <div class="code-block">
 <pre><code>window.FLOATDOCK_CONFIG = {
   breakpoint: 768,
   lineUrl: "https://lin.ee/xxxxxx",
@@ -617,234 +464,132 @@ window.FLOATDOCK_CONFIG = {
   hideOnScroll: {
     enabled: true,
     hideDirection: "down",
-    hideAfter: 120,
-    minDelta: 10
+    hideAfter: 120
   }
 };</code></pre>
+        </div>
+      </div>
     </div>
-
-    <div class="small" style="margin-top:12px;">
-      さらに細かい設定（色、位置、FAB items、アイコン等）は <code>floatdock.js</code> のデフォルト値を参照してください。
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <h4 class="h6 fw-bold mb-3">Common Tips</h4>
+        <ul class="list-unstyled small text-muted">
+          <li class="mb-2"><b>電話導線</b>： <code>tel:000-0000-0000</code> を <code>contactUrl</code> に指定可能</li>
+          <li class="mb-2"><b>外部URL</b>： 原則新規タブで開きます</li>
+          <li><b>自動切替</b>： ウィンドウ幅に応じて表示モードが自動で切り替わります</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge bg-dark border border-secondary text-muted">lineUrl</span>
+          <span class="badge bg-dark border border-secondary text-muted">contactUrl</span>
+          <span class="badge bg-dark border border-secondary text-muted">breakpoint</span>
+          <span class="badge bg-dark border border-secondary text-muted">hideOnScroll</span>
+        </div>
+      </div>
     </div>
-
-    <div class="hr"></div>
-
-    <h3 style="margin:0 0 10px 0; font-size:16px;">Common config tips</h3>
-    <div>
-      <span class="tag good">lineUrl</span>
-      <span class="tag good">contactUrl</span>
-      <span class="tag warn">breakpoint</span>
-      <span class="tag blue">display.mobile</span>
-      <span class="tag blue">hideOnScroll</span>
-    </div>
-    <ul class="list">
-      <li><b>電話導線</b>は <code>tel:</code> を使えます（例: <code>tel:0120-000-000</code>）。</li>
-      <li><b>外部URL</b>は原則新規タブ、同一オリジンは同一タブに遷移する挙動（実装側で変更可）。</li>
-      <li><b>スマホ回転</b>・ウィンドウサイズ変更に追従して自動でモードを切り替えます。</li>
-    </ul>
   </div>
 </section>
 
-<!-- =========================================================
-     追加：制約（CSP/設置方法/SPA）説明
-========================================================== -->
-<section class="section" id="constraints">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Constraints / Why it may not work</h2>
-
-    <div class="two">
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">1) CSP (Content Security Policy)</b>
-        <div class="small">
-          サイト側で CSP が厳しい場合、以下がブロックされることがあります。
-          <ul class="list">
-            <li>外部ドメインの <code>&lt;script&gt;</code> 読み込み</li>
-            <li><code>&lt;style&gt;</code> の動的挿入（表示は出てもCSSが当たらない）</li>
-          </ul>
-
-          <div class="callout" style="margin-top:10px;">
-            <b>How to check</b>
-            <p>
-              DevTools → Network → 対象HTML → Response headers に
-              <code>Content-Security-Policy</code> または <code>Content-Security-Policy-Report-Only</code>
-              があるか確認してください。
-            </p>
-          </div>
-
-          <div class="callout" style="margin-top:10px;">
-            <b>Typical blocking example</b>
-            <p><code>Content-Security-Policy: script-src 'self';</code></p>
-          </div>
-
-          <div class="callout" style="margin-top:10px;">
-            <b>Workarounds</b>
-            <p>
-              最も確実：<strong>floatdock.js を同一ドメインに設置</strong>。<br/>
-              CSPを変更できる場合：<code>script-src</code> に配布先ドメインを許可し、必要なら
-              <code>style-src</code> 側も調整してください（管理者・制作会社への依頼が必要です）。
-            </p>
+<!-- Constraints -->
+<section class="py-5" id="constraints">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Constraints / CSP
+    </h2>
+    <div class="row g-4 text-start">
+      <div class="col-lg-6">
+        <div class="card p-4 h-100 border-warning border-opacity-25">
+          <h3 class="card-title mb-3 text-warning">1) CSP (Content Security Policy)</h3>
+          <div class="small text-muted">
+            <p>サイト側で CSP が厳しい場合、外部JSの読み込みや動的な <code>&lt;style&gt;</code> 挿入が制限されることがあります。</p>
+            <div class="alert alert-dark p-3 border-secondary mb-3" style="background: rgba(0,0,0,.2);">
+              <h4 class="small fw-bold mb-1">How to check</h4>
+              <p class="mb-0 x-small">DevTools → Network で <code>Content-Security-Policy</code> ヘッダを確認してください。</p>
+            </div>
+            <p class="mb-0"><strong>解決策</strong>： <code>floatdock.js</code> をサイトと同一ドメインに設置してください。</p>
           </div>
         </div>
       </div>
-
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">2) Tag Manager / 3rd-party injection</b>
-        <div class="small">
-          GTM等のタグマネージャ経由で設置する場合、環境によっては
-          <code>position: fixed</code> や <code>z-index</code> の挙動が想定と異なることがあります。
-          <ul class="list">
-            <li>推奨：<b>&lt;head&gt; に直接 &lt;script&gt; を追加</b></li>
-            <li>代替：同一ドメイン配信 + CSP調整</li>
-          </ul>
-
-          <div class="hr"></div>
-
-          <b style="display:block;margin-bottom:8px;">3) SPA / Client-side routing</b>
-          <div class="small">
-            React/Vueなどでページ遷移時にDOMが再生成される場合、ウィジェットが消えることがあります。<br/>
-            その場合はルーティング後に <code>LineWidget.update()</code> を呼び出してください。
-          </div>
-          <div class="code" style="margin-top:10px;">
-<pre><code>// Example (after route change)
-if (window.LineWidget && typeof window.LineWidget.update === "function") {
-  window.LineWidget.update();
-}</code></pre>
+      <div class="col-lg-6">
+        <div class="card p-4 h-100 border-info border-opacity-25">
+          <h3 class="card-title mb-3 text-info">2) SPA / Client-side routing</h3>
+          <div class="small text-muted">
+            <p>React/Vueなどでページ遷移時にDOMが再生成される場合、ウィジェットが消えることがあります。</p>
+            <div class="code-block py-2 mb-3">
+<pre class="m-0"><code class="x-small">// 遷移後に再初期化
+window.LineWidget?.update?.();</code></pre>
+            </div>
+            <p class="mb-0">各フレームワークのルーター・フック内で上記を実行してください。</p>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="callout" style="margin-top:12px;">
-      <b>Terminology note</b>
-      <p>
-        ここで言う「CSP」はセキュリティヘッダの <b>Content Security Policy</b> を指します
-        （CPA=広告指標とは別です）。CSPが有効だと、外部JSの読み込みや動的CSS注入が制限される場合があります。
+<!-- Troubleshooting -->
+<section class="py-5" id="troubleshoot">
+  <div class="container">
+    <h2 class="h5 fw-bold mb-4 d-flex align-items-center">
+      <span class="me-2" style="width:24px; height:2px; background:var(--accent);"></span> Troubleshooting
+    </h2>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h4 class="h6 fw-bold mb-3"><i class="bi bi-eye-slash me-2"></i> 表示されない</h4>
+          <ul class="list-unstyled mb-0 small text-muted">
+            <li class="mb-2">• CSPによる制限の確認</li>
+            <li class="mb-2">• ファイルパス（404エラー）の確認</li>
+            <li>• 他要素の <code>z-index</code> との競合</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card p-4">
+          <h4 class="h6 fw-bold mb-3"><i class="bi bi-hand-index-thumb me-2"></i> クリックできない</h4>
+          <ul class="list-unstyled mb-0 small text-muted">
+            <li class="mb-2">• 前面に透明な要素が被っていないか</li>
+            <li>• <code>pointer-events: none</code> の設定確認</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center mb-2">
+          <div class="logo-badge" aria-hidden="true" style="width:24px; height:24px; border-radius:6px;">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+               <path d="M20 12c0 3.8-3.6 6.9-8 6.9-1 0-2-.2-2.9-.5L4 20l1.3-3.2C4.5 15.7 4 13.9 4 12c0-3.8 3.6-6.9 8-6.9s8 3.1 8 6.9Z" stroke="white" stroke-width="2"/>
+             </svg>
+          </div>
+          <b class="fs-5">floatdock</b>
+        </div>
+        <p class="small text-muted mb-0">Tiny CTA widget for existing websites. Created by <a href="https://monou.jp" class="text-white fw-bold text-decoration-underline">monou.jp</a></p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <a class="btn btn-outline-custom" href="#demo">Back to top</a>
+          <a class="btn btn-primary-custom px-4" href="https://github.com/monou-jp/floatdock">GitHub</a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 pt-4 border-top" style="border-color: rgba(255,255,255,.1) !important;">
+      <p class="x-small text-muted mb-0">
+        JavaScriptツール・ウィジェットの制作依頼も承っております。お気軽にご相談ください。
       </p>
     </div>
   </div>
-</section>
+</footer>
 
-<!-- =========================================================
-     追加：計測（GA4）・アクセシビリティ・推奨構成
-========================================================== -->
-<section class="section" id="useful">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Useful notes</h2>
-
-    <div class="two">
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Click tracking (GA4 / Ads)</b>
-        <div class="small">
-          floatdock は計測SDKに依存しません。必要ならクリックイベントで <code>gtag</code> / <code>dataLayer</code> などを呼び出してください。
-        </div>
-        <div class="code" style="margin-top:10px;">
-<pre><code>// Example: GA4 event
-a.addEventListener("click", function () {
-  if (window.gtag) {
-    gtag("event", "click", {
-      event_category: "floatdock",
-      event_label: "line"
-    });
-  }
-});</code></pre>
-        </div>
-      </div>
-
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Accessibility (basic)</b>
-        <div class="small">
-          ボタンには <code>aria-label</code> を付与し、基本的な操作性を確保します。<br/>
-          WCAG等の厳密準拠が必要な場合は、フォーカス制御やキーボード操作の拡張を推奨します。
-        </div>
-
-        <div class="hr"></div>
-        <b style="display:block;margin-bottom:8px;">Trademark / icons</b>
-        <div class="small">
-          floatdock は商標ロゴ画像に依存しません（汎用SVGを使用）。<br/>
-          公式ロゴを使う場合は各サービスのガイドラインに従ってください。
-        </div>
-      </div>
-    </div>
-
-    <div class="hr"></div>
-
-    <h3 style="margin:0 0 10px 0; font-size:16px;">Suggested repository structure</h3>
-    <div class="code">
-<pre><code>floatdock/
-  floatdock.js
-  docs/
-    index.html   # this landing page (GitHub Pages)
-  README.md
-  LICENSE</code></pre>
-    </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     追加：トラブルシューティング
-========================================================== -->
-<section class="section" id="troubleshoot">
-  <div class="wrap">
-    <h2 style="margin:0 0 12px 0; font-size:18px;">Troubleshooting</h2>
-
-    <div class="two">
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Not showing</b>
-        <ul class="list">
-          <li>CSPで <code>script-src</code> が制限されていないか（#Constraints参照）</li>
-          <li><code>floatdock.js</code> が 404 になっていないか（Networkで確認）</li>
-          <li>他要素の <code>z-index</code> が極端に高くないか</li>
-          <li>画面幅が <code>breakpoint</code> を跨いでモードが変わっていないか</li>
-        </ul>
-      </div>
-
-      <div class="card pad">
-        <b style="display:block;margin-bottom:8px;">Cannot click</b>
-        <ul class="list">
-          <li>上に透明な要素が被っていないか（DevToolsで要素確認）</li>
-          <li>親要素に <code>pointer-events: none</code> が掛かっていないか</li>
-          <li>iframe内で動かしている場合は、親側の制限により挙動が変わることがあります</li>
-        </ul>
-
-        <div class="hr"></div>
-
-        <b style="display:block;margin-bottom:8px;">SPA pages (disappear after navigation)</b>
-        <div class="small">ルーティング後に再生成してください。</div>
-        <div class="code" style="margin-top:10px;">
-          <pre><code>window.LineWidget?.update?.();</code></pre>
-        </div>
-      </div>
-    </div>
-
-    <div class="callout" style="margin-top:12px;">
-      <b>Support tip</b>
-      <p>
-        問題が出る場合、まず「対象ページのレスポンスヘッダ（CSPの有無）」と「Consoleのエラー」を確認すると原因切り分けが速くなります。
-      </p>
-    </div>
-  </div>
-</section>
-
-<div class="footer">
-  <div class="wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <div>
-        <b>floatdock</b>
-        <div class="small">Tiny CTA widget for existing websites.</div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a class="btn" href="#demo">Back to top</a>
-        <a class="btn primary" href="https://github.com/monou-jp/floatdock">GitHub</a>
-      </div>
-    </div>
-    <div class="small" style="margin-top:10px;">
-      Created by <a href="https://monou.jp" style="text-decoration:underline;font-weight:bold;">門王 (monou.jp)</a>
-      <div style="margin-top:4px;opacity:0.8;">
-        このような各種JavaScriptツール・ウィジェットの制作依頼も承っております。お気軽にご相談ください。
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Bootstrap 5 JS Bundle (Includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
   // ---- preview mock switching (visual only) ----
@@ -878,7 +623,6 @@ a.addEventListener("click", function () {
   });
 
   // hide-on-scroll visual mock
-  var mock = document.getElementById("mock");
   var lastY = 0;
   window.addEventListener("scroll", function () {
     if (!segHide.checked) {
