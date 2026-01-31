@@ -86,8 +86,8 @@
             enabled: true,
             height: 64,
             safeArea: true,
-            left:  { label: "お電話でのご予約", url: "tel:0120-000-0000", scheme: "auto", icon: "phone" },
-            right: { label: "LINEでのご予約",   url: "",               scheme: "auto", icon: "line" } // 空なら lineUrl
+            left:  { label: "お電話でのご予約", url: "tel:0120-000-0000", scheme: "auto", icon: "phone", bg: "#E53935", color: "#FFFFFF" },
+            right: { label: "LINEでのご予約",   url: "",               scheme: "auto", icon: "line",  bg: "#06C755", color: "#FFFFFF" } // 空なら lineUrl
         },
 
         // スマホ floating（丸/角丸）設定
@@ -288,8 +288,8 @@
             enabled: true,
             height: 64,
             safeArea: true,
-            left:  { label: "問い合わせ", url: "", scheme: "auto", icon: "phone" },
-            right: { label: "公式LINE",  url: "", scheme: "auto", icon: "line" }
+            left:  { label: "問い合わせ", url: "", scheme: "auto", icon: "phone", bg: "#E53935", color: "#FFFFFF" },
+            right: { label: "公式LINE",  url: "", scheme: "auto", icon: "line",  bg: "#06C755", color: "#FFFFFF" }
         },
         mobileFloating: {
             enabled: true,
@@ -561,8 +561,8 @@
         if (m.left) m.left.url = m.left.url || leftUrl;
         if (m.right) m.right.url = m.right.url || rightUrl;
 
-        var leftBtn = makeBtn(m.left, "問い合わせ", "#E53935", "#FFFFFF");
-        var rightBtn = makeBtn(m.right, "公式LINE", "#06C755", "#FFFFFF");
+        var leftBtn = makeBtn(m.left, "問い合わせ", (m.left && m.left.bg) ? m.left.bg : "#E53935", (m.left && m.left.color) ? m.left.color : "#FFFFFF");
+        var rightBtn = makeBtn(m.right, "公式LINE", (m.right && m.right.bg) ? m.right.bg : "#06C755", (m.right && m.right.color) ? m.right.color : "#FFFFFF");
 
         if (leftBtn) bar.appendChild(leftBtn);
         if (rightBtn) bar.appendChild(rightBtn);
